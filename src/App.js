@@ -8,7 +8,8 @@ class InputForms extends React.Component {
         this.state = {
             label: "",
             issuekey: "",
-            type: ""
+            type: "",
+            resultToText: []
         };
 
         this.handleLabelChange = this.handleLabelChange.bind(this);
@@ -32,7 +33,7 @@ class InputForms extends React.Component {
     }
 
     handleLabelSubmit(event) {
-        fetch("http://localhost:3001/tasklabels?labels="+this.state.label, {
+        fetch("http://localhost:3001/tasklabels?labels=" + this.state.label, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -48,11 +49,16 @@ class InputForms extends React.Component {
             })
             .then(json => {
                 console.log(json);
+                this.setState(
+                    {
+                        resultToText: JSON.stringify(json)
+                    }
+                )
             });
     }
 
     handleTypeSubmit(event) {
-        fetch("http://localhost:3001/taskcount?typeid="+this.state.type, {
+        fetch("http://localhost:3001/taskcount?typeid=" + this.state.type, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -68,12 +74,17 @@ class InputForms extends React.Component {
             })
             .then(json => {
                 console.log(json);
+                this.setState(
+                    {
+                        resultToText: JSON.stringify(json)
+                    }
+                )
             });
     }
 
     handleLifespanSubmit(event) {
         console.log(this.state.issuekey)
-        fetch("http://localhost:3001/tasklifespan?issuekey="+this.state.issuekey, {
+        fetch("http://localhost:3001/tasklifespan?issuekey=" + this.state.issuekey, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -89,6 +100,23 @@ class InputForms extends React.Component {
             })
             .then(json => {
                 console.log(json);
+
+                var realDifference = json.difference / 1000;
+                var differenceInDays = Math.trunc(realDifference / (60 * 60 * 24));
+
+                if (differenceInDays > 0) {
+                    differenceInDays = differenceInDays + " дней";
+                } else if (differenceInDays === 0) {
+                    differenceInDays = "Меньше суток";
+                } else {
+                    differenceInDays = "Задача не завершена";
+                }
+
+                this.setState(
+                    {
+                        resultToText: differenceInDays
+                    }
+                )
             });
 
     }
@@ -129,6 +157,8 @@ class InputForms extends React.Component {
                         </button>
                     </form>
                 </li>
+
+                <a>{this.state.resultToText}</a>
             </div>
         );
     }
